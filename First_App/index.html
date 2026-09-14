@@ -68,6 +68,43 @@
   </div>
 </div>
 
+<div id="contactDetailModal" class="modal-overlay hidden">
+  <div class="modal modal-wide">
+    <div class="detail-header">
+      <h2 id="detailName"></h2>
+      <p id="detailCompany" class="card-company"></p>
+    </div>
+
+    <ul id="touchpointList" class="touchpoint-list"></ul>
+    <p id="touchpointEmptyState" class="empty-state-small">No touchpoints yet — add the first one below.</p>
+
+    <form id="addTouchpointForm" class="touchpoint-form">
+      <label>Day offset
+        <input type="number" id="tpDayOffset" min="0" required>
+      </label>
+      <label>Channel
+        <select id="tpChannel">
+          <option value="email">Email</option>
+          <option value="call">Call</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label id="tpChannelOtherLabel" class="hidden touchpoint-form-full">Other channel
+        <input type="text" id="tpChannelOther" placeholder="e.g. text message">
+      </label>
+      <label>Description
+        <input type="text" id="tpDescription" placeholder="e.g. Intro email referencing their Series B" required>
+      </label>
+      <button type="submit" class="btn-primary">+ Add Touchpoint</button>
+    </form>
+
+    <div class="modal-actions">
+      <button type="button" id="closeDetailBtn" class="btn-secondary">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>

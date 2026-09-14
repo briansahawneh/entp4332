@@ -96,7 +96,10 @@
       <label>Description
         <input type="text" id="tpDescription" placeholder="e.g. Intro email referencing their Series B" required>
       </label>
-      <button type="submit" class="btn-primary">+ Add Touchpoint</button>
+      <div class="touchpoint-form-full touchpoint-form-actions">
+        <button type="submit" id="tpSubmitBtn" class="btn-primary">+ Add Touchpoint</button>
+        <button type="button" id="tpCancelEditBtn" class="btn-secondary hidden">Cancel edit</button>
+      </div>
     </form>
 
     <div class="modal-actions">

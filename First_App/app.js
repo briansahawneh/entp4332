@@ -127,6 +127,10 @@ function renderTouchpoints(contact) {
       <span class="touchpoint-day">Day ${tp.dayOffset}</span>
       <span class="touchpoint-channel">${CHANNEL_LABELS[tp.channel] || escapeHtml(tp.channel)}</span>
       <span class="touchpoint-description">${escapeHtml(tp.description)}</span>
+      <span class="touchpoint-actions">
+        <button type="button" class="edit-tp-btn" data-id="${tp.id}">Edit</button>
+        <button type="button" class="delete-tp-btn" data-id="${tp.id}">Delete</button>
+      </span>
     </li>
   `).join('');
 }
@@ -134,19 +138,64 @@ function renderTouchpoints(contact) {
 const tpChannelSelect = document.getElementById('tpChannel');
 const tpChannelOtherLabel = document.getElementById('tpChannelOtherLabel');
 const tpChannelOtherInput = document.getElementById('tpChannelOther');
+const tpSubmitBtn = document.getElementById('tpSubmitBtn');
+const tpCancelEditBtn = document.getElementById('tpCancelEditBtn');
+let editingTouchpointId = null;
+
+function exitEditMode() {
+  editingTouchpointId = null;
+  touchpointForm.reset();
+  tpChannelOtherLabel.classList.add('hidden');
+  tpSubmitBtn.textContent = '+ Add Touchpoint';
+  tpCancelEditBtn.classList.add('hidden');
+}
 
 function openContactDetail(contact) {
   activeContactId = contact.id;
   document.getElementById('detailName').textContent = contact.name;
   document.getElementById('detailCompany').textContent = contact.company;
   renderTouchpoints(contact);
-  touchpointForm.reset();
-  tpChannelOtherLabel.classList.add('hidden');
+  exitEditMode();
   detailModal.classList.remove('hidden');
 }
 
 tpChannelSelect.addEventListener('change', () => {
   tpChannelOtherLabel.classList.toggle('hidden', tpChannelSelect.value !== 'other');
+});
+
+tpCancelEditBtn.addEventListener('click', exitEditMode);
+
+document.getElementById('touchpointList').addEventListener('click', (e) => {
+  const contact = contacts.find(c => c.id === activeContactId);
+  if (!contact) return;
+
+  const editBtn = e.target.closest('.edit-tp-btn');
+  if (editBtn) {
+    const tp = contact.touchpoints.find(t => t.id === editBtn.dataset.id);
+    if (!tp) return;
+
+    editingTouchpointId = tp.id;
+    document.getElementById('tpDayOffset').value = tp.dayOffset;
+    document.getElementById('tpDescription').value = tp.description;
+
+    const isStandardChannel = CHANNEL_LABELS.hasOwnProperty(tp.channel);
+    tpChannelSelect.value = isStandardChannel ? tp.channel : 'other';
+    tpChannelOtherLabel.classList.toggle('hidden', isStandardChannel);
+    tpChannelOtherInput.value = isStandardChannel ? '' : tp.channel;
+
+    tpSubmitBtn.textContent = 'Save Changes';
+    tpCancelEditBtn.classList.remove('hidden');
+    return;
+  }
+
+  const deleteBtn = e.target.closest('.delete-tp-btn');
+  if (deleteBtn) {
+    if (!confirm('Delete this touchpoint? This cannot be undone.')) return;
+    contact.touchpoints = contact.touchpoints.filter(t => t.id !== deleteBtn.dataset.id);
+    saveContacts();
+    renderTouchpoints(contact);
+    if (editingTouchpointId === deleteBtn.dataset.id) exitEditMode();
+  }
 });
 
 document.getElementById('contactGrid').addEventListener('click', (e) => {
@@ -171,22 +220,30 @@ touchpointForm.addEventListener('submit', (e) => {
   const channel = tpChannelSelect.value === 'other'
     ? tpChannelOtherInput.value.trim() || 'Other'
     : tpChannelSelect.value;
+  const dayOffset = parseInt(document.getElementById('tpDayOffset').value, 10);
+  const description = document.getElementById('tpDescription').value.trim();
 
-  const touchpoint = {
-    id: crypto.randomUUID(),
-    dayOffset: parseInt(document.getElementById('tpDayOffset').value, 10),
-    channel,
-    description: document.getElementById('tpDescription').value.trim(),
-    doneStatus: 'pending',
-    doneDate: null,
-  };
+  if (editingTouchpointId) {
+    const tp = contact.touchpoints.find(t => t.id === editingTouchpointId);
+    if (tp) {
+      tp.dayOffset = dayOffset;
+      tp.channel = channel;
+      tp.description = description;
+    }
+  } else {
+    contact.touchpoints.push({
+      id: crypto.randomUUID(),
+      dayOffset,
+      channel,
+      description,
+      doneStatus: 'pending',
+      doneDate: null,
+    });
+  }
 
-  contact.touchpoints.push(touchpoint);
   saveContacts();
   renderTouchpoints(contact);
-
-  touchpointForm.reset();
-  tpChannelOtherLabel.classList.add('hidden');
+  exitEditMode();
 });
 
 renderContacts();

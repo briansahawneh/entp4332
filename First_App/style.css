@@ -279,6 +279,31 @@ main {
 
 .touchpoint-description {
   color: var(--text-main);
+  flex: 1;
+}
+
+.touchpoint-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.touchpoint-actions button {
+  background: transparent;
+  border: none;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.touchpoint-actions button:hover {
+  text-decoration: underline;
+}
+
+.touchpoint-actions .delete-tp-btn {
+  color: #C23934;
 }
 
 .empty-state-small {
@@ -301,11 +326,11 @@ main {
   margin-bottom: 0;
 }
 
-.touchpoint-form .btn-primary {
-  grid-column: 1 / -1;
-  justify-self: start;
-}
-
 .touchpoint-form-full {
   grid-column: 1 / -1;
+}
+
+.touchpoint-form-actions {
+  display: flex;
+  gap: 10px;
 }

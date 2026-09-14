@@ -36,7 +36,8 @@ body {
 }
 
 .logo-icon {
-  color: var(--blue);
+  font-size: 22px;
+  line-height: 1;
   flex-shrink: 0;
 }
 
@@ -46,6 +47,34 @@ body {
   font-weight: 700;
   color: var(--blue);
   letter-spacing: -0.01em;
+}
+
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 32px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.view-tab {
+  padding: 12px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.view-tab:hover {
+  color: var(--text-main);
+}
+
+.view-tab.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
 }
 
 main {
@@ -304,6 +333,47 @@ main {
 
 .touchpoint-actions .delete-tp-btn {
   color: #C23934;
+}
+
+.touchpoint-list-today .touchpoint-row {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.today-contact {
+  flex-shrink: 0;
+  min-width: 160px;
+}
+
+.today-contact .name {
+  font-weight: 700;
+  color: var(--text-main);
+  display: block;
+}
+
+.today-contact .company {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.badge-overdue {
+  background: rgba(194, 57, 52, 0.12);
+  color: #C23934;
+}
+
+.badge-due-today {
+  background: rgba(221, 122, 1, 0.14);
+  color: #B95000;
 }
 
 .empty-state-small {

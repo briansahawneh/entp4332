@@ -10,26 +10,27 @@
 
 <header class="topbar">
   <div class="brand">
-    <svg class="logo-icon" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <ellipse cx="7" cy="11" rx="4" ry="5" fill="#fff" stroke="currentColor" stroke-width="1.6"/>
-      <ellipse cx="25" cy="11" rx="4" ry="5" fill="#fff" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M6 14c0-6 4.5-9.5 10-9.5S26 8 26 14c0 6.5-4.2 11-10 11S6 20.5 6 14Z" fill="#fff" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M20 7c1.8-.6 3.6.3 4 2 .3 1.3-.4 2.4-1.6 2.8-1.6.5-3.6-.6-3.9-2.3-.2-1.1.4-2 1.5-2.5Z" fill="#1B1B1B"/>
-      <path d="M9 17c-1.4.2-2.3 1.3-2.1 2.6.2 1.1 1.3 1.8 2.5 1.6 1.3-.2 2.1-1.3 1.9-2.5-.2-1.1-1.1-1.8-2.3-1.7Z" fill="#1B1B1B"/>
-      <circle cx="12.5" cy="13" r="1.1" fill="currentColor"/>
-      <circle cx="19.5" cy="13" r="1.1" fill="currentColor"/>
-      <ellipse cx="16" cy="20.5" rx="6" ry="3.6" fill="#fff" stroke="currentColor" stroke-width="1.6"/>
-      <ellipse cx="14" cy="20.5" rx="0.9" ry="1.3" fill="currentColor"/>
-      <ellipse cx="18" cy="20.5" rx="0.9" ry="1.3" fill="currentColor"/>
-    </svg>
+    <span class="logo-icon" aria-hidden="true">🐮</span>
     <h1>Cadence Cow</h1>
   </div>
   <button id="addContactBtn" class="btn-primary">+ Add Contact</button>
 </header>
 
+<nav class="view-tabs">
+  <button class="view-tab active" data-view="today">Today</button>
+  <button class="view-tab" data-view="contacts">Contacts</button>
+</nav>
+
 <main>
-  <p id="emptyState" class="empty-state">No contacts yet — round up your first lead to get started 🐮</p>
-  <div id="contactGrid" class="card-grid"></div>
+  <section id="todayView">
+    <p id="todayEmptyState" class="empty-state">Nothing due — the herd's all caught up 🐮</p>
+    <ul id="todayList" class="touchpoint-list touchpoint-list-today"></ul>
+  </section>
+
+  <section id="contactsView" class="hidden">
+    <p id="emptyState" class="empty-state">No contacts yet — round up your first lead to get started 🐮</p>
+    <div id="contactGrid" class="card-grid"></div>
+  </section>
 </main>
 
 <div id="addContactModal" class="modal-overlay hidden">

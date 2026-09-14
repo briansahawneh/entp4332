@@ -29,6 +29,53 @@ function formatDate(iso) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function touchpointDueDate(contact, touchpoint) {
+  const due = new Date(contact.cadenceStartDate + 'T00:00:00');
+  due.setDate(due.getDate() + touchpoint.dayOffset);
+  return due.toISOString().slice(0, 10);
+}
+
+function renderToday() {
+  const today = new Date().toISOString().slice(0, 10);
+  const list = document.getElementById('todayList');
+  const emptyState = document.getElementById('todayEmptyState');
+
+  const dueItems = [];
+  contacts.forEach(contact => {
+    if (contact.status !== 'active') return;
+    contact.touchpoints.forEach(tp => {
+      if (tp.doneStatus !== 'pending') return;
+      const dueDate = touchpointDueDate(contact, tp);
+      if (dueDate > today) return;
+      dueItems.push({ contact, touchpoint: tp, dueDate, isOverdue: dueDate < today });
+    });
+  });
+
+  dueItems.sort((a, b) => {
+    if (a.dueDate !== b.dueDate) return a.dueDate < b.dueDate ? -1 : 1;
+    return a.contact.name.localeCompare(b.contact.name);
+  });
+
+  if (dueItems.length === 0) {
+    emptyState.classList.remove('hidden');
+    list.innerHTML = '';
+    return;
+  }
+  emptyState.classList.add('hidden');
+
+  list.innerHTML = dueItems.map(({ contact, touchpoint, isOverdue }) => `
+    <li class="touchpoint-row">
+      <span class="badge ${isOverdue ? 'badge-overdue' : 'badge-due-today'}">${isOverdue ? 'Overdue' : 'Due today'}</span>
+      <span class="today-contact">
+        <span class="name">${escapeHtml(contact.name)}</span>
+        <span class="company">${escapeHtml(contact.company)}</span>
+      </span>
+      <span class="touchpoint-channel">${CHANNEL_LABELS[touchpoint.channel] || escapeHtml(touchpoint.channel)}</span>
+      <span class="touchpoint-description">${escapeHtml(touchpoint.description)}</span>
+    </li>
+  `).join('');
+}
+
 function renderContacts() {
   const grid = document.getElementById('contactGrid');
   const emptyState = document.getElementById('emptyState');
@@ -97,9 +144,20 @@ form.addEventListener('submit', (e) => {
   contacts.push(contact);
   saveContacts();
   renderContacts();
+  renderToday();
 
   form.reset();
   modal.classList.add('hidden');
+});
+
+// --- Today / Contacts view switching ---
+
+document.querySelectorAll('.view-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.getElementById('todayView').classList.toggle('hidden', tab.dataset.view !== 'today');
+    document.getElementById('contactsView').classList.toggle('hidden', tab.dataset.view !== 'contacts');
+  });
 });
 
 // --- Contact detail / custom cadence ---
@@ -194,6 +252,7 @@ document.getElementById('touchpointList').addEventListener('click', (e) => {
     contact.touchpoints = contact.touchpoints.filter(t => t.id !== deleteBtn.dataset.id);
     saveContacts();
     renderTouchpoints(contact);
+    renderToday();
     if (editingTouchpointId === deleteBtn.dataset.id) exitEditMode();
   }
 });
@@ -243,7 +302,9 @@ touchpointForm.addEventListener('submit', (e) => {
 
   saveContacts();
   renderTouchpoints(contact);
+  renderToday();
   exitEditMode();
 });
 
 renderContacts();
+renderToday();

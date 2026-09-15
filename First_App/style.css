@@ -284,8 +284,9 @@ main {
 
 .touchpoint-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 10px;
+  gap: 6px 10px;
   padding: 10px 12px;
   background: var(--bg);
   border-radius: 6px;
@@ -308,7 +309,79 @@ main {
 
 .touchpoint-description {
   color: var(--text-main);
-  flex: 1;
+  flex: 1 1 160px;
+  white-space: pre-wrap;
+}
+
+.no-description {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.today-description {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 320px;
+  cursor: pointer;
+}
+
+.today-description:hover {
+  color: var(--blue);
+}
+
+.today-description.expanded {
+  white-space: pre-wrap;
+  overflow: visible;
+  text-overflow: clip;
+  max-width: none;
+  flex-basis: 100%;
+  color: var(--text-main);
+  order: 10;
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  cursor: grab;
+  font-size: 15px;
+  user-select: none;
+  touch-action: none;
+  transition: color 150ms ease;
+}
+
+.drag-handle:hover {
+  color: var(--blue);
+}
+
+.touchpoint-list-today .touchpoint-row {
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.3, 1),
+              box-shadow 150ms ease;
+  will-change: transform;
+}
+
+.touchpoint-list-today.reordering {
+  user-select: none;
+  cursor: grabbing;
+}
+
+.touchpoint-row.dragging {
+  position: relative;
+  z-index: 5;
+  transition: none;
+  box-shadow: 0 12px 28px rgba(22, 50, 92, 0.22);
+  background: var(--card-bg);
+}
+
+.touchpoint-row.dragging .drag-handle {
+  cursor: grabbing;
+  color: var(--blue);
+}
+
+.touchpoint-row.settling {
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.3, 1),
+              box-shadow 180ms ease;
 }
 
 .touchpoint-actions {
@@ -333,6 +406,26 @@ main {
 
 .touchpoint-actions .delete-tp-btn {
   color: #C23934;
+}
+
+.touchpoint-actions .mark-done-tp-btn,
+.touchpoint-actions .today-done-btn {
+  color: #04844B;
+}
+
+.touchpoint-resolved {
+  opacity: 0.65;
+}
+
+.touchpoint-resolved .touchpoint-description {
+  text-decoration: line-through;
+}
+
+.touchpoint-status {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
 }
 
 .touchpoint-list-today .touchpoint-row {
@@ -384,7 +477,7 @@ main {
 
 .touchpoint-form {
   display: grid;
-  grid-template-columns: 100px 130px 1fr;
+  grid-template-columns: 120px 1fr;
   gap: 10px;
   align-items: start;
   padding-top: 16px;

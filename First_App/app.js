@@ -739,6 +739,7 @@ document.getElementById('contactSearch').addEventListener('input', (e) => {
 // --- The cow's speech bubble ---
 
 const brandBtn = document.getElementById('brandBtn');
+const brandMark = document.querySelector('.brand-mark');
 const cowChat = document.getElementById('cowChat');
 
 function setCowChatOpen(open) {
@@ -746,8 +747,21 @@ function setCowChatOpen(open) {
   brandBtn.setAttribute('aria-expanded', String(open));
 }
 
+// Nudge a first-time visitor toward the cow with a brief pulse, then never
+// show it again once they've actually clicked it.
+const INTRO_HINT_KEY = 'cadence_intro_seen';
+try {
+  if (!localStorage.getItem(INTRO_HINT_KEY)) brandMark.classList.add('hint');
+} catch (e) { /* localStorage unavailable; skip the hint */ }
+
+function dismissIntroHint() {
+  brandMark.classList.remove('hint');
+  try { localStorage.setItem(INTRO_HINT_KEY, '1'); } catch (e) { /* not fatal */ }
+}
+
 brandBtn.addEventListener('click', (e) => {
   e.stopPropagation(); // the document handler below would close it again
+  dismissIntroHint();
   setCowChatOpen(!cowChat.classList.contains('open'));
 });
 

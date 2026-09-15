@@ -200,6 +200,18 @@ a {
   transition: transform var(--t) var(--ease), background var(--t) var(--ease);
 }
 
+/* First-visit hint: a ring rather than a real border, so it doesn't nudge
+   layout the way an animated border-width would. Stops on its own after a
+   few pulses, or the moment the cow is actually clicked. */
+.brand-mark.hint {
+  animation: hint-ring 1s ease-in-out 3;
+}
+
+@keyframes hint-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45, 91, 255, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(45, 91, 255, 0.5); }
+}
+
 .brand-mark .cow-mark {
   width: 30px;
   height: 30px;

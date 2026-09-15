@@ -1,13 +1,25 @@
 const STORAGE_KEY = 'cadence_contacts';
 
+let dayOffsetsMigrated = false;
 let contacts = loadContacts();
+// Write the 1-based day numbers back once, so storage matches what's shown.
+if (dayOffsetsMigrated) saveContacts();
 
 function loadContacts() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    // Contacts saved before touchpoints existed won't have this field.
-    parsed.forEach(c => { if (!c.touchpoints) c.touchpoints = []; });
+    parsed.forEach(c => {
+      // Contacts saved before touchpoints existed won't have this field.
+      if (!c.touchpoints) c.touchpoints = [];
+      // Day numbering used to start at 0; nothing should render as "Day 0".
+      c.touchpoints.forEach(tp => {
+        if (!Number.isInteger(tp.dayOffset) || tp.dayOffset < 1) {
+          tp.dayOffset = 1;
+          dayOffsetsMigrated = true;
+        }
+      });
+    });
     return parsed;
   } catch (e) {
     return [];
@@ -86,9 +98,11 @@ function tagNewItems(container, selector, seen) {
 const seenTodayIds = new Set();
 const seenContactIds = new Set();
 
+// Day numbering is 1-based: Day 1 is the cadence start date itself, Day 3 is
+// two days later, and so on.
 function touchpointDueDate(contact, touchpoint) {
   const due = new Date(contact.cadenceStartDate + 'T00:00:00');
-  due.setDate(due.getDate() + touchpoint.dayOffset);
+  due.setDate(due.getDate() + touchpoint.dayOffset - 1);
   return due.toISOString().slice(0, 10);
 }
 
@@ -648,6 +662,12 @@ tpChannelSelect.addEventListener('change', () => {
   tpChannelOtherLabel.classList.toggle('hidden', tpChannelSelect.value !== 'other');
 });
 
+// Clear the custom message as soon as they start fixing it, or it sticks
+// and blocks the next submit.
+document.getElementById('tpDayOffset').addEventListener('input', (e) => {
+  e.target.setCustomValidity('');
+});
+
 tpCancelEditBtn.addEventListener('click', exitEditMode);
 
 function startEditingTouchpoint(tp) {
@@ -797,8 +817,17 @@ touchpointForm.addEventListener('submit', (e) => {
   const channel = tpChannelSelect.value === 'other'
     ? tpChannelOtherInput.value.trim() || 'Other'
     : tpChannelSelect.value;
-  const dayOffset = parseInt(document.getElementById('tpDayOffset').value, 10);
+  const dayField = document.getElementById('tpDayOffset');
+  const dayOffset = parseInt(dayField.value, 10);
   const description = document.getElementById('tpDescription').value.trim();
+
+  // The input carries min="1", but never trust the field alone.
+  if (!Number.isInteger(dayOffset) || dayOffset < 1) {
+    dayField.setCustomValidity('Day must be 1 or higher.');
+    dayField.reportValidity();
+    return;
+  }
+  dayField.setCustomValidity('');
 
   if (editingTouchpointId) {
     const tp = contact.touchpoints.find(t => t.id === editingTouchpointId);

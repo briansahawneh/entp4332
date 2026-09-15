@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "First_App/style.css"
+        ],
+        "createdAt": "2026-09-15T02:28:01.420Z",
+        "reason": "Matches .view-tab::after, the active-tab underline in the Today/Contacts nav - the standard selected-tab affordance and the only indicator of the current view, not a card accent stripe. Decided by Claude during the polish pass."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "First_App/index.html"
+        ],
+        "createdAt": "2026-09-15T02:28:01.813Z",
+        "reason": "Same .view-tab::after nav underline, reported against the markup file. Decided by Claude during the polish pass."
+      }
+    ]
+  }
+}

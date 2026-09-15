@@ -1,0 +1,9 @@
+# Impeccable design skill — vendored tooling, including a 15MB platform binary.
+# Installed per-machine, not part of the app.
+.claude/skills/
+.claude/agents/
+.claude/settings.local.json
+
+# Machine-local detector state
+.impeccable/config.local.json
+.impeccable/hook.cache.json

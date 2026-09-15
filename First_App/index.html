@@ -4,26 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cadence Cow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<svg class="icon-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Cow mark: horns + wide ears + Holstein spot keep it unmistakably bovine -->
+    <symbol id="i-cow" viewBox="0 0 40 40">
+      <path d="M11.5 11.2c-1.4-2-1.2-4.2.3-4.8 1.6-.6 3.2.8 3.7 3" class="cow-horn"/>
+      <path d="M28.5 11.2c1.4-2 1.2-4.2-.3-4.8-1.6-.6-3.2.8-3.7 3" class="cow-horn"/>
+      <ellipse cx="7.6" cy="18.2" rx="5.2" ry="3.6" transform="rotate(-24 7.6 18.2)" class="cow-ear"/>
+      <ellipse cx="32.4" cy="18.2" rx="5.2" ry="3.6" transform="rotate(24 32.4 18.2)" class="cow-ear"/>
+      <path d="M20 9.5c6.9 0 12.2 4.4 12.2 10.6 0 6.9-5.3 11.6-12.2 11.6S7.8 27 7.8 20.1C7.8 13.9 13.1 9.5 20 9.5Z" class="cow-head"/>
+      <path d="M13.4 11.2c2.1-.6 3.9.4 4.1 2.2.2 1.9-1.3 3.3-3.4 3.4-2.3.1-3.9-1.1-4-2.8-.1-1.6 1.3-2.5 3.3-2.8Z" class="cow-spot"/>
+      <circle cx="16" cy="20.4" r="1.5" class="cow-eye"/>
+      <circle cx="24" cy="20.4" r="1.5" class="cow-eye"/>
+      <ellipse cx="20" cy="26.6" rx="7.4" ry="5" class="cow-muzzle"/>
+      <ellipse cx="17.2" cy="26.2" rx="1.15" ry="1.5" class="cow-nostril"/>
+      <ellipse cx="22.8" cy="26.2" rx="1.15" ry="1.5" class="cow-nostril"/>
+    </symbol>
+
+    <!-- Peeking cow: same vocabulary as the mark, but hooves over a ledge -->
+    <symbol id="i-cow-peek" viewBox="0 0 48 34">
+      <path d="M15.5 8.4c-1.6-2.2-1.4-4.6.3-5.2 1.7-.7 3.4.8 4 3.2" class="cow-horn"/>
+      <path d="M32.5 8.4c1.6-2.2 1.4-4.6-.3-5.2-1.7-.7-3.4.8-4 3.2" class="cow-horn"/>
+      <ellipse cx="10.5" cy="15" rx="5" ry="3.4" transform="rotate(-24 10.5 15)" class="cow-ear"/>
+      <ellipse cx="37.5" cy="15" rx="5" ry="3.4" transform="rotate(24 37.5 15)" class="cow-ear"/>
+      <path d="M24 6.6c6.6 0 11.7 4.2 11.7 10.2 0 6.6-5.1 11.1-11.7 11.1S12.3 23.4 12.3 16.8C12.3 10.8 17.4 6.6 24 6.6Z" class="cow-head"/>
+      <path d="M18 9.6c2-.6 3.7.4 3.9 2.1.2 1.8-1.2 3.2-3.2 3.3-2.2.1-3.7-1-3.8-2.7-.1-1.5 1.2-2.4 3.1-2.7Z" class="cow-spot"/>
+      <circle cx="20.2" cy="16.4" r="1.45" class="cow-eye"/>
+      <circle cx="27.8" cy="16.4" r="1.45" class="cow-eye"/>
+      <ellipse cx="24" cy="22.4" rx="7" ry="4.6" class="cow-muzzle"/>
+      <ellipse cx="21.4" cy="22" rx="1.05" ry="1.4" class="cow-nostril"/>
+      <ellipse cx="26.6" cy="22" rx="1.05" ry="1.4" class="cow-nostril"/>
+      <rect x="11.6" y="27.4" width="7" height="5.6" rx="2.6" class="cow-hoof"/>
+      <rect x="29.4" y="27.4" width="7" height="5.6" rx="2.6" class="cow-hoof"/>
+    </symbol>
+
+    <symbol id="i-grip" viewBox="0 0 16 16">
+      <circle cx="6" cy="4" r="1.35"/><circle cx="10" cy="4" r="1.35"/>
+      <circle cx="6" cy="8" r="1.35"/><circle cx="10" cy="8" r="1.35"/>
+      <circle cx="6" cy="12" r="1.35"/><circle cx="10" cy="12" r="1.35"/>
+    </symbol>
+
+    <symbol id="i-check" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M4.5 10.5 8.2 14.2 15.5 6.4"/>
+    </symbol>
+    <symbol id="i-skip" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M5.5 5.2 11.2 10l-5.7 4.8M14.6 5v10"/>
+    </symbol>
+    <symbol id="i-undo" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M7.5 5 4 8.5 7.5 12"/>
+      <path d="M4 8.5h7.5a4 4 0 0 1 0 8H8"/>
+    </symbol>
+    <symbol id="i-pencil" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M13.4 3.9 16.1 6.6 7.2 15.5 3.8 16.2 4.5 12.8Z"/>
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M4.5 6h11M8.2 6V4.4h3.6V6M6.2 6l.7 9.6h6.2L13.8 6"/>
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5"/>
+    </symbol>
+    <symbol id="i-chevron" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M12.5 4.5 6.5 10l6 5.5"/>
+    </symbol>
+    <symbol id="i-mail" viewBox="0 0 20 20" class="i-stroke">
+      <rect x="2.8" y="4.8" width="14.4" height="10.4" rx="2"/>
+      <path d="m3.4 6.2 6.6 4.8 6.6-4.8"/>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M6.3 3.4 8.6 7 6.9 8.9a9.6 9.6 0 0 0 4.2 4.2L13 11.4l3.6 2.3-.9 2.5a1.6 1.6 0 0 1-1.7 1C9.3 16.6 3.4 10.7 2.8 5a1.6 1.6 0 0 1 1-1.7Z"/>
+    </symbol>
+    <symbol id="i-linkedin" viewBox="0 0 20 20" class="i-stroke">
+      <rect x="3" y="3" width="14" height="14" rx="3"/>
+      <path d="M6.6 8.6v5M6.6 6.2v.1M10 13.5v-5M10 10.2c.2-1.1.9-1.7 1.9-1.7 1.1 0 1.7.7 1.7 2v3"/>
+    </symbol>
+    <symbol id="i-dot" viewBox="0 0 20 20" class="i-stroke">
+      <circle cx="10" cy="10" r="5.5"/>
+    </symbol>
+  </defs>
+</svg>
+
 <header class="topbar">
-  <div class="brand">
-    <span class="logo-icon" aria-hidden="true">🐮</span>
-    <h1>Cadence Cow</h1>
-  </div>
-  <button id="addContactBtn" class="btn-primary">+ Add Contact</button>
+  <a class="brand" href="#" aria-label="Cadence Cow home">
+    <span class="brand-mark"><svg class="cow-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-cow"/></svg></span>
+    <span class="brand-word">Cadence<span class="brand-word-accent">Cow</span></span>
+  </a>
+  <button id="addContactBtn" class="btn-primary">Add contact</button>
 </header>
 
-<nav class="view-tabs">
+<nav class="view-tabs" aria-label="Views">
   <button class="view-tab active" data-view="today">Today</button>
   <button class="view-tab" data-view="contacts">Contacts</button>
 </nav>
 
 <main>
   <section id="todayView">
-    <p id="todayEmptyState" class="empty-state">Nothing due — the herd's all caught up 🐮</p>
+    <div id="todayEmptyState" class="empty-state empty-state-hero">
+      <svg class="mascot" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-cow"/></svg>
+      <p class="empty-state-title">The herd's all caught up</p>
+      <p class="empty-state-sub">Nothing due today. Go graze.</p>
+    </div>
     <ul id="todayList" class="touchpoint-list touchpoint-list-today"></ul>
   </section>
 
@@ -32,27 +118,35 @@
       <input type="search" id="contactSearch" placeholder="Search contacts, companies, or anything in a cadence…" aria-label="Search contacts">
       <p id="contactSearchCount" class="contact-search-count hidden"></p>
     </div>
-    <p id="emptyState" class="empty-state">No contacts yet — round up your first lead to get started 🐮</p>
+    <div id="emptyState" class="empty-state empty-state-hero">
+      <svg class="mascot" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-cow"/></svg>
+      <p class="empty-state-title" id="emptyStateTitle">No contacts yet</p>
+      <p class="empty-state-sub" id="emptyStateSub">Round up your first lead to get started.</p>
+    </div>
     <div id="contactGrid" class="card-grid"></div>
   </section>
 </main>
 
-<button id="contactPanelToggle" class="contact-panel-toggle" aria-expanded="false">
-  <span class="contact-panel-toggle-arrow">‹</span> Contacts
+<button id="contactPanelToggle" class="contact-panel-toggle" aria-expanded="false" aria-label="Contact list">
+  <svg class="panel-cow" viewBox="0 0 48 34" aria-hidden="true"><use href="#i-cow-peek"/></svg>
+  <svg class="contact-panel-toggle-arrow icon" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-chevron"/></svg>
+  <span>Contacts</span>
 </button>
 
 <aside id="contactPanel" class="contact-panel" aria-hidden="true">
   <div class="contact-panel-header">
     <h2>All contacts</h2>
-    <button type="button" id="contactPanelClose" class="contact-panel-close" aria-label="Close contact list">×</button>
+    <button type="button" id="contactPanelClose" class="icon-btn" aria-label="Close contact list">
+      <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
   </div>
-  <p id="contactPanelEmpty" class="empty-state-small">No contacts yet 🐮</p>
+  <p id="contactPanelEmpty" class="empty-state-small">No contacts yet — add one to start the herd.</p>
   <ul id="contactPanelList" class="contact-panel-list"></ul>
 </aside>
 
 <div id="addContactModal" class="modal-overlay hidden">
-  <div class="modal">
-    <h2 id="contactFormTitle">Add Contact</h2>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contactFormTitle">
+    <h2 id="contactFormTitle">Add contact</h2>
     <form id="addContactForm">
       <label>Name
         <input type="text" id="fieldName" required>
@@ -87,10 +181,10 @@
 </div>
 
 <div id="contactDetailModal" class="modal-overlay hidden">
-  <div class="modal modal-wide">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="detailName">
     <div class="detail-header">
       <h2 id="detailName"></h2>
-      <p id="detailCompany" class="card-company"></p>
+      <p id="detailCompany" class="detail-company"></p>
       <label class="detail-status">Status
         <select id="detailStatus">
           <option value="active">Active</option>
@@ -124,7 +218,7 @@
         <textarea id="tpDescription" rows="5" placeholder="e.g. Intro email referencing their Series B — paste a full draft here if you want"></textarea>
       </label>
       <div class="touchpoint-form-full touchpoint-form-actions">
-        <button type="submit" id="tpSubmitBtn" class="btn-primary">+ Add Touchpoint</button>
+        <button type="submit" id="tpSubmitBtn" class="btn-primary">Add touchpoint</button>
         <button type="button" id="tpCancelEditBtn" class="btn-secondary hidden">Cancel edit</button>
       </div>
     </form>
@@ -138,6 +232,8 @@
     </div>
   </div>
 </div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="app.js"></script>
 </body>

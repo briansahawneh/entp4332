@@ -36,6 +36,56 @@ function descriptionPreview(description) {
   return description && description.trim() ? description : '(no description)';
 }
 
+// --- Icons, voice, and motion helpers ---
+
+const ICON_VIEWBOX = { 'i-cow': '0 0 40 40', 'i-grip': '0 0 16 16' };
+
+function icon(id, className = 'icon') {
+  const viewBox = ICON_VIEWBOX[id] || '0 0 20 20';
+  return `<svg class="${className}" viewBox="${viewBox}" aria-hidden="true"><use href="#${id}"/></svg>`;
+}
+
+const CHANNEL_ICONS = { email: 'i-mail', call: 'i-phone', linkedin: 'i-linkedin', other: 'i-dot' };
+const channelIcon = (channel) => icon(CHANNEL_ICONS[channel] || 'i-dot');
+
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let toastTimer = null;
+function showToast(message) {
+  const el = document.getElementById('toast');
+  el.innerHTML = `${icon('i-cow', 'cow-mark')}<span>${escapeHtml(message)}</span>`;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// Only items that weren't on screen last render get an entrance, so marking
+// one touchpoint done doesn't restage the entire list every time.
+function tagNewItems(container, selector, seen) {
+  const current = new Set();
+  let position = 0;
+
+  container.querySelectorAll(selector).forEach(el => {
+    const id = el.dataset.enterId;
+    current.add(id);
+    if (seen.has(id)) return;
+
+    el.classList.add('row-enter');
+    el.style.animationDelay = `${Math.min(position, 5) * 45}ms`;
+    position++;
+    el.addEventListener('animationend', () => {
+      el.classList.remove('row-enter');
+      el.style.animationDelay = '';
+    }, { once: true });
+  });
+
+  seen.clear();
+  current.forEach(id => seen.add(id));
+}
+
+const seenTodayIds = new Set();
+const seenContactIds = new Set();
+
 function touchpointDueDate(contact, touchpoint) {
   const due = new Date(contact.cadenceStartDate + 'T00:00:00');
   due.setDate(due.getDate() + touchpoint.dayOffset);
@@ -98,27 +148,30 @@ function renderToday() {
   if (orderedItems.length === 0) {
     emptyState.classList.remove('hidden');
     list.innerHTML = '';
+    seenTodayIds.clear();
     return;
   }
   emptyState.classList.add('hidden');
 
   list.innerHTML = orderedItems.map(({ contact, touchpoint, isOverdue }) => `
-    <li class="touchpoint-row" data-tp-id="${touchpoint.id}">
-      <span class="drag-handle" title="Drag to reorder">⠿</span>
+    <li class="touchpoint-row" data-tp-id="${touchpoint.id}" data-enter-id="${touchpoint.id}">
+      <span class="drag-handle" title="Drag to reorder">${icon('i-grip')}</span>
       <span class="badge ${isOverdue ? 'badge-overdue' : 'badge-due-today'}">${isOverdue ? 'Overdue' : 'Due today'}</span>
       <span class="today-contact">
         <span class="name">${escapeHtml(contact.name)}</span>
         <span class="company">${escapeHtml(contact.company)}</span>
       </span>
-      <span class="touchpoint-channel">${CHANNEL_LABELS[touchpoint.channel] || escapeHtml(touchpoint.channel)}</span>
+      <span class="touchpoint-channel">${channelIcon(touchpoint.channel)}${CHANNEL_LABELS[touchpoint.channel] || escapeHtml(touchpoint.channel)}</span>
       <span class="touchpoint-description today-description" title="Click to expand">${escapeHtml(descriptionPreview(touchpoint.description))}</span>
       <span class="touchpoint-actions">
-        <button type="button" class="today-done-btn" data-contact-id="${contact.id}" data-tp-id="${touchpoint.id}">Mark done</button>
-        <button type="button" class="today-skip-btn" data-contact-id="${contact.id}" data-tp-id="${touchpoint.id}">Skip</button>
-        <button type="button" class="today-edit-btn" data-contact-id="${contact.id}" data-tp-id="${touchpoint.id}">Edit</button>
+        <button type="button" class="today-done-btn" data-contact-id="${contact.id}" data-tp-id="${touchpoint.id}">${icon('i-check')}Mark done</button>
+        <button type="button" class="today-skip-btn" data-contact-id="${contact.id}" data-tp-id="${touchpoint.id}">${icon('i-skip')}Skip</button>
+        <button type="button" class="today-edit-btn" data-contact-id="${contact.id}" data-tp-id="${touchpoint.id}">${icon('i-pencil')}Edit</button>
       </span>
     </li>
   `).join('');
+
+  tagNewItems(list, '.touchpoint-row', seenTodayIds);
 }
 
 // Skipped touchpoints count as handled — otherwise a cadence you
@@ -148,8 +201,8 @@ function renderContactPanel() {
           <span class="panel-contact-progress">${total ? `${handled} of ${total} done` : 'No touchpoints yet'}</span>
         </button>
         <span class="panel-contact-actions">
-          <button type="button" class="panel-edit-btn" data-id="${c.id}">Edit</button>
-          <button type="button" class="panel-delete-btn" data-id="${c.id}">Delete</button>
+          <button type="button" class="panel-edit-btn" data-id="${c.id}">${icon('i-pencil')}Edit</button>
+          <button type="button" class="panel-delete-btn" data-id="${c.id}">${icon('i-trash')}Delete</button>
         </span>
       </li>
     `;
@@ -185,11 +238,16 @@ function renderContacts() {
   }
 
   if (visible.length === 0) {
-    emptyState.textContent = contacts.length === 0
-      ? 'No contacts yet — round up your first lead to get started 🐮'
-      : `No contacts match "${contactSearchTerm}".`;
+    const noneAtAll = contacts.length === 0;
+    document.getElementById('emptyStateTitle').textContent =
+      noneAtAll ? 'No contacts yet' : 'Nothing matches that';
+    document.getElementById('emptyStateSub').textContent =
+      noneAtAll
+        ? 'Round up your first lead to get started.'
+        : `No contact or cadence mentions "${contactSearchTerm}".`;
     emptyState.classList.remove('hidden');
     grid.innerHTML = '';
+    seenContactIds.clear();
     return;
   }
   emptyState.classList.add('hidden');
@@ -206,13 +264,13 @@ function renderContacts() {
     const { total, handled, percent } = touchpointProgress(c);
     const progress = total
       ? `<div class="card-progress">
-           <div class="card-progress-bar"><span style="width: ${percent}%"></span></div>
+           <div class="card-progress-bar" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"><span style="--fill: ${handled / total}"></span></div>
            <p class="card-progress-label">${handled} of ${total} touchpoint${total === 1 ? '' : 's'} done</p>
          </div>`
       : `<p class="card-progress-label card-progress-empty">No touchpoints yet</p>`;
 
     return `
-      <div class="card">
+      <div class="card" data-enter-id="${c.id}">
         <div class="card-header">
           <h3>${escapeHtml(c.name)}</h3>
           <span class="badge badge-status-${c.status}">${STATUS_LABELS[c.status] || escapeHtml(c.status)}</span>
@@ -229,6 +287,8 @@ function renderContacts() {
       </div>
     `;
   }).join('');
+
+  tagNewItems(grid, '.card', seenContactIds);
 }
 
 const modal = document.getElementById('addContactModal');
@@ -252,7 +312,7 @@ function closeContactForm() {
   modal.classList.add('hidden');
   form.reset();
   editingContactId = null;
-  contactFormTitle.textContent = 'Add Contact';
+  contactFormTitle.textContent = 'Add contact';
   contactSubmitBtn.textContent = 'Add';
 }
 
@@ -269,8 +329,8 @@ function openContactForEditing(contact) {
   Object.entries(CONTACT_FIELDS).forEach(([key, fieldId]) => {
     document.getElementById(fieldId).value = contact[key] || '';
   });
-  contactFormTitle.textContent = 'Edit Contact';
-  contactSubmitBtn.textContent = 'Save Changes';
+  contactFormTitle.textContent = 'Edit contact';
+  contactSubmitBtn.textContent = 'Save changes';
   modal.classList.remove('hidden');
 }
 
@@ -327,10 +387,30 @@ document.getElementById('todayList').addEventListener('click', (e) => {
   const contact = contacts.find(c => c.id === btn.dataset.contactId);
   if (!contact) return;
 
-  setTouchpointStatus(contact, btn.dataset.tpId, btn.classList.contains('today-done-btn') ? 'done' : 'skipped');
-  renderToday();
-  renderContacts();
-  if (activeContactId === contact.id) renderTouchpoints(contact);
+  const row = btn.closest('.touchpoint-row');
+  if (row && row.classList.contains('row-leaving')) return; // already on its way out
+
+  const done = btn.classList.contains('today-done-btn');
+  const clearsTheDay = todayListEl.querySelectorAll('.touchpoint-row:not(.row-leaving)').length === 1;
+
+  const commit = () => {
+    setTouchpointStatus(contact, btn.dataset.tpId, done ? 'done' : 'skipped');
+    renderToday();
+    renderContacts();
+    if (activeContactId === contact.id) renderTouchpoints(contact);
+    showToast(clearsTheDay
+      ? "That's the last one — the herd's all caught up."
+      : done ? 'Touchpoint done.' : 'Touchpoint skipped.');
+  };
+
+  // The row stamps and collapses before the data changes, so the list doesn't
+  // jump out from under the click.
+  if (row && !reduceMotion()) {
+    row.classList.add('row-leaving', done ? 'is-done' : 'is-skipped');
+    setTimeout(commit, 240);
+  } else {
+    commit();
+  }
 });
 
 // --- Today view drag-to-reorder ---
@@ -338,7 +418,7 @@ document.getElementById('todayList').addEventListener('click', (e) => {
 // cursor while the others slide out of the way, which native DnD can't animate.
 
 const todayListEl = document.getElementById('todayList');
-const ROW_GAP = 8; // matches the .touchpoint-list gap
+const ROW_GAP = 10; // must match the .touchpoint-list-today gap in style.css
 const SETTLE_MS = 180;
 let drag = null;
 
@@ -483,10 +563,10 @@ function renderTouchpoints(contact) {
 
   list.innerHTML = sorted.map(tp => {
     const statusActions = tp.doneStatus === 'pending'
-      ? `<button type="button" class="mark-done-tp-btn" data-id="${tp.id}">Mark done</button>
-         <button type="button" class="mark-skip-tp-btn" data-id="${tp.id}">Skip</button>`
-      : `<span class="touchpoint-status">${tp.doneStatus === 'done' ? '✓ Done' : 'Skipped'} ${formatDate(tp.doneDate)}</span>
-         <button type="button" class="reopen-tp-btn" data-id="${tp.id}">Reopen</button>`;
+      ? `<button type="button" class="mark-done-tp-btn" data-id="${tp.id}">${icon('i-check')}Mark done</button>
+         <button type="button" class="mark-skip-tp-btn" data-id="${tp.id}">${icon('i-skip')}Skip</button>`
+      : `<span class="touchpoint-status ${tp.doneStatus === 'skipped' ? 'is-skipped' : ''}">${tp.doneStatus === 'done' ? icon('i-check') : icon('i-skip')}${tp.doneStatus === 'done' ? 'Done' : 'Skipped'} ${formatDate(tp.doneDate)}</span>
+         <button type="button" class="reopen-tp-btn" data-id="${tp.id}">${icon('i-undo')}Reopen</button>`;
 
     // A non-active contact isn't being chased any more, so its still-pending
     // touchpoints are shown paused rather than as live work.
@@ -495,12 +575,12 @@ function renderTouchpoints(contact) {
     return `
       <li class="touchpoint-row ${tp.doneStatus !== 'pending' ? 'touchpoint-resolved' : ''} ${paused ? 'touchpoint-paused' : ''}">
         <span class="touchpoint-day">Day ${tp.dayOffset}</span>
-        <span class="touchpoint-channel">${CHANNEL_LABELS[tp.channel] || escapeHtml(tp.channel)}</span>
+        <span class="touchpoint-channel">${channelIcon(tp.channel)}${CHANNEL_LABELS[tp.channel] || escapeHtml(tp.channel)}</span>
         <span class="touchpoint-description">${tp.description ? escapeHtml(tp.description) : '<span class="no-description">(no description)</span>'}</span>
         <span class="touchpoint-actions">
           ${statusActions}
-          <button type="button" class="edit-tp-btn" data-id="${tp.id}">Edit</button>
-          <button type="button" class="delete-tp-btn" data-id="${tp.id}">Delete</button>
+          <button type="button" class="edit-tp-btn" data-id="${tp.id}">${icon('i-pencil')}Edit</button>
+          <button type="button" class="delete-tp-btn" data-id="${tp.id}">${icon('i-trash')}Delete</button>
         </span>
       </li>
     `;
@@ -518,7 +598,7 @@ function exitEditMode() {
   editingTouchpointId = null;
   touchpointForm.reset();
   tpChannelOtherLabel.classList.add('hidden');
-  tpSubmitBtn.textContent = '+ Add Touchpoint';
+  tpSubmitBtn.textContent = 'Add touchpoint';
   tpCancelEditBtn.classList.add('hidden');
 }
 
@@ -580,7 +660,7 @@ function startEditingTouchpoint(tp) {
   tpChannelOtherLabel.classList.toggle('hidden', isStandardChannel);
   tpChannelOtherInput.value = isStandardChannel ? '' : tp.channel;
 
-  tpSubmitBtn.textContent = 'Save Changes';
+  tpSubmitBtn.textContent = 'Save changes';
   tpCancelEditBtn.classList.remove('hidden');
   document.getElementById('tpDescription').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -618,6 +698,8 @@ document.getElementById('touchpointList').addEventListener('click', (e) => {
     renderTouchpoints(contact);
     renderToday();
     renderContacts();
+    if (status === 'done') showToast('Touchpoint done.');
+    else if (status === 'skipped') showToast('Touchpoint skipped.');
   }
 });
 

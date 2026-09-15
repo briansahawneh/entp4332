@@ -108,11 +108,48 @@ main {
   box-shadow: 0 2px 8px rgba(22, 50, 92, 0.06);
 }
 
+.card .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .card h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 700;
   color: var(--text-main);
+}
+
+.card-progress {
+  margin-top: 14px;
+}
+
+.card-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.card-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--blue);
+  transition: width 250ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.card-progress-label {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.card-progress-empty {
+  margin-top: 14px;
+  font-style: italic;
 }
 
 .card-jobtitle {
@@ -501,6 +538,22 @@ main {
 .badge-due-today {
   background: rgba(221, 122, 1, 0.14);
   color: #B95000;
+}
+
+.badge-status-active {
+  background: rgba(1, 118, 211, 0.12);
+  color: var(--blue);
+}
+
+.badge-status-won {
+  background: rgba(4, 132, 75, 0.12);
+  color: #04844B;
+}
+
+.badge-status-replied,
+.badge-status-no_response {
+  background: rgba(112, 110, 107, 0.12);
+  color: var(--text-dim);
 }
 
 .empty-state-small {

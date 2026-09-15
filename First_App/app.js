@@ -140,9 +140,25 @@ function renderContacts() {
       ? `<p class="card-meta"><a href="${escapeHtml(c.linkedin)}" target="_blank" rel="noopener">LinkedIn</a></p>`
       : '';
     const notesLine = c.notes ? `<p class="card-notes">${escapeHtml(c.notes)}</p>` : '';
+
+    // Skipped touchpoints count as handled — otherwise a cadence you
+    // deliberately skipped part of could never reach 100%.
+    const total = c.touchpoints.length;
+    const handled = c.touchpoints.filter(tp => tp.doneStatus !== 'pending').length;
+    const percent = total ? Math.round((handled / total) * 100) : 0;
+    const progress = total
+      ? `<div class="card-progress">
+           <div class="card-progress-bar"><span style="width: ${percent}%"></span></div>
+           <p class="card-progress-label">${handled} of ${total} touchpoint${total === 1 ? '' : 's'} done</p>
+         </div>`
+      : `<p class="card-progress-label card-progress-empty">No touchpoints yet</p>`;
+
     return `
       <div class="card">
-        <h3>${escapeHtml(c.name)}</h3>
+        <div class="card-header">
+          <h3>${escapeHtml(c.name)}</h3>
+          <span class="badge badge-status-${c.status}">${STATUS_LABELS[c.status] || escapeHtml(c.status)}</span>
+        </div>
         ${jobTitleLine}
         <p class="card-company">${escapeHtml(c.company)}</p>
         ${emailLine}
@@ -150,6 +166,7 @@ function renderContacts() {
         ${linkedinLine}
         <p class="card-meta">Cadence starts ${formatDate(c.cadenceStartDate)}</p>
         ${notesLine}
+        ${progress}
         <button type="button" class="btn-secondary view-cadence-btn" data-id="${c.id}">View cadence</button>
       </div>
     `;
@@ -222,6 +239,7 @@ document.getElementById('todayList').addEventListener('click', (e) => {
 
   setTouchpointStatus(contact, btn.dataset.tpId, btn.classList.contains('today-done-btn') ? 'done' : 'skipped');
   renderToday();
+  renderContacts();
   if (activeContactId === contact.id) renderTouchpoints(contact);
 });
 
@@ -495,6 +513,7 @@ document.getElementById('touchpointList').addEventListener('click', (e) => {
     saveContacts();
     renderTouchpoints(contact);
     renderToday();
+    renderContacts();
     if (editingTouchpointId === deleteBtn.dataset.id) exitEditMode();
     return;
   }
@@ -508,6 +527,7 @@ document.getElementById('touchpointList').addEventListener('click', (e) => {
     setTouchpointStatus(contact, statusBtn.dataset.id, status);
     renderTouchpoints(contact);
     renderToday();
+    renderContacts();
   }
 });
 
@@ -557,6 +577,7 @@ touchpointForm.addEventListener('submit', (e) => {
   saveContacts();
   renderTouchpoints(contact);
   renderToday();
+  renderContacts();
   exitEditMode();
 });
 

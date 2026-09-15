@@ -43,7 +43,7 @@ function formatDate(iso) {
 
 // Full text, with a fallback for empty descriptions. The Today row itself
 // clips this with CSS (nowrap + ellipsis) so short text shows in full and
-// only long text gets cropped — the Edit button opens the whole thing.
+// only long text gets cropped. The Edit button opens the whole thing.
 function descriptionPreview(description) {
   return description && description.trim() ? description : '(no description)';
 }
@@ -188,7 +188,7 @@ function renderToday() {
   tagNewItems(list, '.touchpoint-row', seenTodayIds);
 }
 
-// Skipped touchpoints count as handled — otherwise a cadence you
+// Skipped touchpoints count as handled, otherwise a cadence you
 // deliberately skipped part of could never reach 100%.
 function touchpointProgress(contact) {
   const total = contact.touchpoints.length;
@@ -358,7 +358,7 @@ form.addEventListener('submit', (e) => {
   });
 
   if (editingContactId) {
-    // Status and touchpoints belong to the cadence, not this form — keep them.
+    // Status and touchpoints belong to the cadence, not this form, so keep them.
     const contact = contacts.find(c => c.id === editingContactId);
     if (contact) Object.assign(contact, values);
   } else {
@@ -413,7 +413,7 @@ document.getElementById('todayList').addEventListener('click', (e) => {
     renderContacts();
     if (activeContactId === contact.id) renderTouchpoints(contact);
     showToast(clearsTheDay
-      ? "That's the last one — the herd's all caught up."
+      ? "That's the last one. The herd's all caught up."
       : done ? 'Touchpoint done.' : 'Touchpoint skipped.');
   };
 
@@ -489,7 +489,7 @@ todayListEl.addEventListener('pointerdown', (e) => {
   todayListEl.classList.add('reordering');
 
   // Keeps pointer events flowing if the cursor leaves the row mid-drag, but
-  // it throws when the pointer isn't active — never let that break the drag.
+  // it throws when the pointer isn't active, so never let that break the drag.
   try {
     handle.setPointerCapture(e.pointerId);
   } catch (err) {
@@ -631,7 +631,7 @@ function renderStatusNote(contact) {
   detailStatusNote.classList.toggle('hidden', !paused);
   if (paused) {
     detailStatusNote.textContent =
-      `Marked ${STATUS_LABELS[contact.status]} — remaining touchpoints are paused and won't show up on Today.`;
+      `Marked ${STATUS_LABELS[contact.status]}. Remaining touchpoints are paused and won't show up on Today.`;
   }
 }
 
@@ -734,6 +734,36 @@ document.getElementById('contactGrid').addEventListener('click', (e) => {
 document.getElementById('contactSearch').addEventListener('input', (e) => {
   contactSearchTerm = e.target.value.trim().toLowerCase();
   renderContacts();
+});
+
+// --- The cow's speech bubble ---
+
+const brandBtn = document.getElementById('brandBtn');
+const cowChat = document.getElementById('cowChat');
+
+function setCowChatOpen(open) {
+  cowChat.classList.toggle('open', open);
+  brandBtn.setAttribute('aria-expanded', String(open));
+}
+
+brandBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // the document handler below would close it again
+  setCowChatOpen(!cowChat.classList.contains('open'));
+});
+
+document.getElementById('cowChatClose').addEventListener('click', () => {
+  setCowChatOpen(false);
+  brandBtn.focus();
+});
+
+cowChat.addEventListener('click', (e) => e.stopPropagation());
+
+document.addEventListener('click', () => setCowChatOpen(false));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || !cowChat.classList.contains('open')) return;
+  setCowChatOpen(false);
+  brandBtn.focus();
 });
 
 // --- Slide-out contact panel ---

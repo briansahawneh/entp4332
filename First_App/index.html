@@ -91,10 +91,24 @@
 </svg>
 
 <header class="topbar">
-  <a class="brand" href="#" aria-label="Cadence Cow home">
+  <button type="button" id="brandBtn" class="brand" aria-expanded="false" aria-controls="cowChat" aria-label="Cadence Cow: how it works">
     <span class="brand-mark"><svg class="cow-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-cow"/></svg></span>
     <span class="brand-word">Cadence<span class="brand-word-accent">Cow</span></span>
-  </a>
+  </button>
+
+  <div id="cowChat" class="cow-chat" role="dialog" aria-labelledby="cowChatTitle">
+    <button type="button" id="cowChatClose" class="icon-btn cow-chat-close" aria-label="Close">
+      <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <p class="cow-chat-title" id="cowChatTitle">Howdy. Here's the short version</p>
+    <ol class="cow-chat-steps">
+      <li><strong>Add a contact</strong> with the day you started reaching out.</li>
+      <li><strong>Build their cadence</strong> with a touchpoint for each follow-up: Day 1, Day 3, Day 21.</li>
+      <li><strong>Work the Today list</strong>: everything due across everyone. Mark done or skip.</li>
+    </ol>
+    <p class="cow-chat-foot">Questions? <a href="mailto:briansahawneh04@gmail.com">briansahawneh04@gmail.com</a></p>
+  </div>
+
   <button id="addContactBtn" class="btn-primary">Add contact</button>
 </header>
 
@@ -140,7 +154,7 @@
       <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-close"/></svg>
     </button>
   </div>
-  <p id="contactPanelEmpty" class="empty-state-small">No contacts yet — add one to start the herd.</p>
+  <p id="contactPanelEmpty" class="empty-state-small">No contacts yet. Add one to start the herd.</p>
   <ul id="contactPanelList" class="contact-panel-list"></ul>
 </aside>
 
@@ -197,7 +211,7 @@
     </div>
 
     <ul id="touchpointList" class="touchpoint-list"></ul>
-    <p id="touchpointEmptyState" class="empty-state-small">No touchpoints yet — add the first one below.</p>
+    <p id="touchpointEmptyState" class="empty-state-small">No touchpoints yet. Add the first one below.</p>
 
     <form id="addTouchpointForm" class="touchpoint-form">
       <label>Day
@@ -215,7 +229,7 @@
         <input type="text" id="tpChannelOther" placeholder="e.g. text message">
       </label>
       <label class="touchpoint-form-full">Description (optional)
-        <textarea id="tpDescription" rows="5" placeholder="e.g. Intro email referencing their Series B — paste a full draft here if you want"></textarea>
+        <textarea id="tpDescription" rows="5" placeholder="e.g. Intro email referencing their Series B. Paste a full draft here if you want."></textarea>
       </label>
       <div class="touchpoint-form-full touchpoint-form-actions">
         <button type="submit" id="tpSubmitBtn" class="btn-primary">Add touchpoint</button>

@@ -1,5 +1,5 @@
 /* ============================================================
-   Cadence Cow — dairy modern
+   Cadence Cow, dairy modern
    Warm pasture canvas, confident blue, Holstein accents.
    ============================================================ */
 
@@ -25,7 +25,7 @@
   --blue-tint: rgba(45, 91, 255, 0.10);
   --pink: #FF7A9C;
 
-  /* Status — stable meanings */
+  /* Status colours with stable meanings */
   --green-ink: #0B6B47;
   --green-tint: rgba(14, 143, 94, 0.13);
   --amber-ink: #8A4B00;
@@ -43,7 +43,7 @@
   --r-lg: 18px;
   --r-pill: 999px;
 
-  /* Depth — every shadow carries offset and blur */
+  /* Depth: every shadow carries offset and blur */
   --shadow-sm: 0 1px 2px rgba(25, 20, 24, 0.05), 0 2px 8px rgba(25, 20, 24, 0.05);
   --shadow-md: 0 2px 4px rgba(25, 20, 24, 0.06), 0 10px 22px rgba(25, 20, 24, 0.08);
   --shadow-lg: 0 8px 16px rgba(25, 20, 24, 0.10), 0 28px 56px rgba(25, 20, 24, 0.18);
@@ -181,8 +181,13 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
   text-decoration: none;
   color: var(--ink);
+  cursor: pointer;
 }
 
 .brand-mark {
@@ -221,6 +226,125 @@ a {
 .brand-word-accent {
   color: var(--blue);
   margin-left: 0.22em;
+}
+
+/* --- The cow's speech bubble --- */
+
+.brand[aria-expanded="true"] .brand-mark {
+  background: #EBE0CF;
+  transform: rotate(-6deg);
+}
+
+.cow-chat {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: 22px;
+  z-index: 25;
+  width: min(330px, calc(100vw - 32px));
+  padding: 18px 20px 16px;
+  background: var(--card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  transform-origin: top left;
+  display: none;
+}
+
+.cow-chat.open {
+  display: block;
+  animation: chat-pop var(--t) var(--ease);
+}
+
+/* Tail, pointing back up at the mark */
+.cow-chat::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 26px;
+  width: 16px;
+  height: 16px;
+  background: var(--card);
+  border-radius: 3px;
+  transform: rotate(45deg);
+}
+
+@keyframes chat-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cow-chat-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.cow-chat-title {
+  margin: 0 0 12px;
+  padding-right: 28px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.cow-chat-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cow-chat-steps li {
+  position: relative;
+  padding-left: 30px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  counter-increment: step;
+}
+
+.cow-chat-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: var(--r-pill);
+  background: var(--blue-tint);
+  color: var(--blue-deep);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cow-chat-steps strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.cow-chat-foot {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.cow-chat-foot a {
+  color: var(--blue-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cow-chat-foot a:hover {
+  text-decoration: underline;
 }
 
 /* --- View tabs --- */
@@ -1050,7 +1174,7 @@ main {
   transform: translate(-330px, -50%);
 }
 
-/* Hangs off the top edge of the tab, hooves over the lip. No idle loop —
+/* Hangs off the top edge of the tab, hooves over the lip. No idle loop:
    this sits on screen all day, so it only moves when you interact with it. */
 .panel-cow {
   position: absolute;
@@ -1121,7 +1245,7 @@ main {
   padding: 0;
 }
 
-/* Panel entries are rows with dividers — not boxes inside a box */
+/* Panel entries are rows with dividers, not boxes inside a box */
 .panel-contact {
   padding: 12px 8px;
   margin: 0 -8px;

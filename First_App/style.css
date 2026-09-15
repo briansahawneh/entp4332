@@ -273,6 +273,29 @@ main {
   margin-top: 2px;
 }
 
+.detail-status {
+  display: inline-block;
+  margin: 14px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.detail-status select {
+  width: auto;
+  min-width: 160px;
+}
+
+.detail-status-note {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(1, 118, 211, 0.08);
+  border-left: 3px solid var(--blue);
+  color: var(--text-main);
+  font-size: 12.5px;
+}
+
 .touchpoint-list {
   list-style: none;
   margin: 0 0 18px;
@@ -419,6 +442,17 @@ main {
 
 .touchpoint-resolved .touchpoint-description {
   text-decoration: line-through;
+}
+
+.touchpoint-paused {
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--bg),
+    var(--bg) 8px,
+    rgba(112, 110, 107, 0.06) 8px,
+    rgba(112, 110, 107, 0.06) 16px
+  );
 }
 
 .touchpoint-status {

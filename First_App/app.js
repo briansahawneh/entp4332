@@ -380,8 +380,12 @@ function renderTouchpoints(contact) {
       : `<span class="touchpoint-status">${tp.doneStatus === 'done' ? '✓ Done' : 'Skipped'} ${formatDate(tp.doneDate)}</span>
          <button type="button" class="reopen-tp-btn" data-id="${tp.id}">Reopen</button>`;
 
+    // A non-active contact isn't being chased any more, so its still-pending
+    // touchpoints are shown paused rather than as live work.
+    const paused = tp.doneStatus === 'pending' && contact.status !== 'active';
+
     return `
-      <li class="touchpoint-row ${tp.doneStatus !== 'pending' ? 'touchpoint-resolved' : ''}">
+      <li class="touchpoint-row ${tp.doneStatus !== 'pending' ? 'touchpoint-resolved' : ''} ${paused ? 'touchpoint-paused' : ''}">
         <span class="touchpoint-day">Day ${tp.dayOffset}</span>
         <span class="touchpoint-channel">${CHANNEL_LABELS[tp.channel] || escapeHtml(tp.channel)}</span>
         <span class="touchpoint-description">${tp.description ? escapeHtml(tp.description) : '<span class="no-description">(no description)</span>'}</span>
@@ -410,14 +414,47 @@ function exitEditMode() {
   tpCancelEditBtn.classList.add('hidden');
 }
 
+const detailStatusSelect = document.getElementById('detailStatus');
+const detailStatusNote = document.getElementById('detailStatusNote');
+
+const STATUS_LABELS = {
+  active: 'Active',
+  replied: 'Replied',
+  no_response: 'No response',
+  won: 'Won',
+};
+
+function renderStatusNote(contact) {
+  const paused = contact.status !== 'active';
+  detailStatusNote.classList.toggle('hidden', !paused);
+  if (paused) {
+    detailStatusNote.textContent =
+      `Marked ${STATUS_LABELS[contact.status]} — remaining touchpoints are paused and won't show up on Today.`;
+  }
+}
+
 function openContactDetail(contact) {
   activeContactId = contact.id;
   document.getElementById('detailName').textContent = contact.name;
   document.getElementById('detailCompany').textContent = contact.company;
+  detailStatusSelect.value = contact.status;
+  renderStatusNote(contact);
   renderTouchpoints(contact);
   exitEditMode();
   detailModal.classList.remove('hidden');
 }
+
+detailStatusSelect.addEventListener('change', () => {
+  const contact = contacts.find(c => c.id === activeContactId);
+  if (!contact) return;
+
+  contact.status = detailStatusSelect.value;
+  saveContacts();
+  renderStatusNote(contact);
+  renderTouchpoints(contact);
+  renderContacts();
+  renderToday();
+});
 
 tpChannelSelect.addEventListener('change', () => {
   tpChannelOtherLabel.classList.toggle('hidden', tpChannelSelect.value !== 'other');

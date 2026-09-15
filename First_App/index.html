@@ -28,14 +28,31 @@
   </section>
 
   <section id="contactsView" class="hidden">
+    <div class="contact-search">
+      <input type="search" id="contactSearch" placeholder="Search contacts, companies, or anything in a cadence…" aria-label="Search contacts">
+      <p id="contactSearchCount" class="contact-search-count hidden"></p>
+    </div>
     <p id="emptyState" class="empty-state">No contacts yet — round up your first lead to get started 🐮</p>
     <div id="contactGrid" class="card-grid"></div>
   </section>
 </main>
 
+<button id="contactPanelToggle" class="contact-panel-toggle" aria-expanded="false">
+  <span class="contact-panel-toggle-arrow">‹</span> Contacts
+</button>
+
+<aside id="contactPanel" class="contact-panel" aria-hidden="true">
+  <div class="contact-panel-header">
+    <h2>All contacts</h2>
+    <button type="button" id="contactPanelClose" class="contact-panel-close" aria-label="Close contact list">×</button>
+  </div>
+  <p id="contactPanelEmpty" class="empty-state-small">No contacts yet 🐮</p>
+  <ul id="contactPanelList" class="contact-panel-list"></ul>
+</aside>
+
 <div id="addContactModal" class="modal-overlay hidden">
   <div class="modal">
-    <h2>Add Contact</h2>
+    <h2 id="contactFormTitle">Add Contact</h2>
     <form id="addContactForm">
       <label>Name
         <input type="text" id="fieldName" required>
@@ -63,7 +80,7 @@
       </label>
       <div class="modal-actions">
         <button type="button" id="cancelAddBtn" class="btn-secondary">Cancel</button>
-        <button type="submit" class="btn-primary">Add</button>
+        <button type="submit" id="contactSubmitBtn" class="btn-primary">Add</button>
       </div>
     </form>
   </div>
@@ -112,8 +129,12 @@
       </div>
     </form>
 
-    <div class="modal-actions">
-      <button type="button" id="closeDetailBtn" class="btn-secondary">Close</button>
+    <div class="modal-actions modal-actions-split">
+      <button type="button" id="deleteContactBtn" class="btn-danger">Delete contact</button>
+      <span class="modal-actions-right">
+        <button type="button" id="editContactBtn" class="btn-secondary">Edit contact</button>
+        <button type="button" id="closeDetailBtn" class="btn-secondary">Close</button>
+      </span>
     </div>
   </div>
 </div>

@@ -94,6 +94,34 @@ main {
   display: none !important;
 }
 
+.contact-search {
+  margin-bottom: 20px;
+}
+
+.contact-search input {
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-main);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.contact-search input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.15);
+}
+
+.contact-search-count {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -216,6 +244,22 @@ main {
   cursor: pointer;
 }
 
+.btn-danger {
+  background: transparent;
+  border: 1px solid rgba(194, 57, 52, 0.4);
+  color: #C23934;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: rgba(194, 57, 52, 0.08);
+  border-color: #C23934;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -284,6 +328,17 @@ main {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 8px;
+}
+
+.modal-actions-split {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.modal-actions-right {
+  display: flex;
+  gap: 10px;
 }
 
 .modal-wide {
@@ -583,4 +638,166 @@ main {
 .touchpoint-form-actions {
   display: flex;
   gap: 10px;
+}
+
+/* --- Slide-out contact panel --- */
+
+.contact-panel-toggle {
+  position: fixed;
+  top: 140px;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background: var(--card-bg);
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: -2px 2px 10px rgba(22, 50, 92, 0.1);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.contact-panel-toggle.open {
+  transform: translateX(-320px);
+}
+
+.contact-panel-toggle-arrow {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 220ms ease;
+}
+
+.contact-panel-toggle.open .contact-panel-toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.contact-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 19;
+  width: 320px;
+  height: 100vh;
+  padding: 22px 20px;
+  overflow-y: auto;
+  background: var(--card-bg);
+  border-left: 1px solid var(--border);
+  box-shadow: -6px 0 24px rgba(22, 50, 92, 0.12);
+  transform: translateX(100%);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.contact-panel.open {
+  transform: translateX(0);
+}
+
+.contact-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.contact-panel-header h2 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text-main);
+}
+
+.contact-panel-close {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.contact-panel-close:hover {
+  color: var(--text-main);
+}
+
+.contact-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-contact {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.panel-contact-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.panel-contact-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.panel-contact-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.panel-contact-main:hover .panel-contact-name {
+  color: var(--blue);
+}
+
+.panel-contact-company,
+.panel-contact-progress {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.panel-contact-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.panel-contact-actions button {
+  border: none;
+  background: transparent;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.panel-contact-actions button:hover {
+  text-decoration: underline;
+}
+
+.panel-contact-actions .panel-delete-btn {
+  color: #C23934;
 }

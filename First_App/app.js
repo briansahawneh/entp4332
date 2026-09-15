@@ -121,18 +121,80 @@ function renderToday() {
   `).join('');
 }
 
+// Skipped touchpoints count as handled — otherwise a cadence you
+// deliberately skipped part of could never reach 100%.
+function touchpointProgress(contact) {
+  const total = contact.touchpoints.length;
+  const handled = contact.touchpoints.filter(tp => tp.doneStatus !== 'pending').length;
+  return { total, handled, percent: total ? Math.round((handled / total) * 100) : 0 };
+}
+
+function renderContactPanel() {
+  const list = document.getElementById('contactPanelList');
+  const empty = document.getElementById('contactPanelEmpty');
+
+  empty.classList.toggle('hidden', contacts.length > 0);
+
+  list.innerHTML = contacts.map(c => {
+    const { total, handled } = touchpointProgress(c);
+    return `
+      <li class="panel-contact">
+        <button type="button" class="panel-contact-main" data-id="${c.id}">
+          <span class="panel-contact-top">
+            <span class="panel-contact-name">${escapeHtml(c.name)}</span>
+            <span class="badge badge-status-${c.status}">${STATUS_LABELS[c.status] || escapeHtml(c.status)}</span>
+          </span>
+          <span class="panel-contact-company">${escapeHtml(c.company)}</span>
+          <span class="panel-contact-progress">${total ? `${handled} of ${total} done` : 'No touchpoints yet'}</span>
+        </button>
+        <span class="panel-contact-actions">
+          <button type="button" class="panel-edit-btn" data-id="${c.id}">Edit</button>
+          <button type="button" class="panel-delete-btn" data-id="${c.id}">Delete</button>
+        </span>
+      </li>
+    `;
+  }).join('');
+}
+
+let contactSearchTerm = '';
+
+// Searches the contact's own details plus everything in their cadence, so
+// "pricing" finds the person whose day-7 call is about pricing.
+function contactMatchesSearch(contact, term) {
+  if (!term) return true;
+  const haystack = [
+    contact.name, contact.jobTitle, contact.company,
+    contact.email, contact.phone, contact.notes,
+    ...contact.touchpoints.flatMap(tp => [tp.description, tp.channel]),
+  ];
+  return haystack.some(value => (value || '').toLowerCase().includes(term));
+}
+
 function renderContacts() {
   const grid = document.getElementById('contactGrid');
   const emptyState = document.getElementById('emptyState');
+  const searchCount = document.getElementById('contactSearchCount');
 
-  if (contacts.length === 0) {
+  renderContactPanel();
+
+  const visible = contacts.filter(c => contactMatchesSearch(c, contactSearchTerm));
+
+  searchCount.classList.toggle('hidden', !contactSearchTerm);
+  if (contactSearchTerm) {
+    searchCount.textContent = `${visible.length} of ${contacts.length} contact${contacts.length === 1 ? '' : 's'}`;
+  }
+
+  if (visible.length === 0) {
+    emptyState.textContent = contacts.length === 0
+      ? 'No contacts yet — round up your first lead to get started 🐮'
+      : `No contacts match "${contactSearchTerm}".`;
     emptyState.classList.remove('hidden');
     grid.innerHTML = '';
     return;
   }
   emptyState.classList.add('hidden');
 
-  grid.innerHTML = contacts.map(c => {
+  grid.innerHTML = visible.map(c => {
     const jobTitleLine = c.jobTitle ? `<p class="card-jobtitle">${escapeHtml(c.jobTitle)}</p>` : '';
     const emailLine = c.email ? `<p class="card-meta">${escapeHtml(c.email)}</p>` : '';
     const phoneLine = c.phone ? `<p class="card-meta">${escapeHtml(c.phone)}</p>` : '';
@@ -141,11 +203,7 @@ function renderContacts() {
       : '';
     const notesLine = c.notes ? `<p class="card-notes">${escapeHtml(c.notes)}</p>` : '';
 
-    // Skipped touchpoints count as handled — otherwise a cadence you
-    // deliberately skipped part of could never reach 100%.
-    const total = c.touchpoints.length;
-    const handled = c.touchpoints.filter(tp => tp.doneStatus !== 'pending').length;
-    const percent = total ? Math.round((handled / total) * 100) : 0;
+    const { total, handled, percent } = touchpointProgress(c);
     const progress = total
       ? `<div class="card-progress">
            <div class="card-progress-bar"><span style="width: ${percent}%"></span></div>
@@ -175,41 +233,73 @@ function renderContacts() {
 
 const modal = document.getElementById('addContactModal');
 const form = document.getElementById('addContactForm');
+const contactFormTitle = document.getElementById('contactFormTitle');
+const contactSubmitBtn = document.getElementById('contactSubmitBtn');
+let editingContactId = null;
+
+const CONTACT_FIELDS = {
+  name: 'fieldName',
+  jobTitle: 'fieldJobTitle',
+  company: 'fieldCompany',
+  email: 'fieldEmail',
+  phone: 'fieldPhone',
+  linkedin: 'fieldLinkedIn',
+  cadenceStartDate: 'fieldStartDate',
+  notes: 'fieldNotes',
+};
+
+function closeContactForm() {
+  modal.classList.add('hidden');
+  form.reset();
+  editingContactId = null;
+  contactFormTitle.textContent = 'Add Contact';
+  contactSubmitBtn.textContent = 'Add';
+}
 
 document.getElementById('addContactBtn').addEventListener('click', () => {
+  closeContactForm();
   document.getElementById('fieldStartDate').value = new Date().toISOString().slice(0, 10);
   modal.classList.remove('hidden');
 });
 
-document.getElementById('cancelAddBtn').addEventListener('click', () => {
-  modal.classList.add('hidden');
-  form.reset();
-});
+document.getElementById('cancelAddBtn').addEventListener('click', closeContactForm);
+
+function openContactForEditing(contact) {
+  editingContactId = contact.id;
+  Object.entries(CONTACT_FIELDS).forEach(([key, fieldId]) => {
+    document.getElementById(fieldId).value = contact[key] || '';
+  });
+  contactFormTitle.textContent = 'Edit Contact';
+  contactSubmitBtn.textContent = 'Save Changes';
+  modal.classList.remove('hidden');
+}
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
-  const contact = {
-    id: crypto.randomUUID(),
-    name: document.getElementById('fieldName').value.trim(),
-    jobTitle: document.getElementById('fieldJobTitle').value.trim(),
-    company: document.getElementById('fieldCompany').value.trim(),
-    email: document.getElementById('fieldEmail').value.trim(),
-    phone: document.getElementById('fieldPhone').value.trim(),
-    linkedin: document.getElementById('fieldLinkedIn').value.trim(),
-    cadenceStartDate: document.getElementById('fieldStartDate').value,
-    notes: document.getElementById('fieldNotes').value.trim(),
-    status: 'active',
-    touchpoints: [],
-  };
+  const values = {};
+  Object.entries(CONTACT_FIELDS).forEach(([key, fieldId]) => {
+    const raw = document.getElementById(fieldId).value;
+    values[key] = key === 'cadenceStartDate' ? raw : raw.trim();
+  });
 
-  contacts.push(contact);
+  if (editingContactId) {
+    // Status and touchpoints belong to the cadence, not this form — keep them.
+    const contact = contacts.find(c => c.id === editingContactId);
+    if (contact) Object.assign(contact, values);
+  } else {
+    contacts.push({
+      id: crypto.randomUUID(),
+      ...values,
+      status: 'active',
+      touchpoints: [],
+    });
+  }
+
   saveContacts();
   renderContacts();
   renderToday();
-
-  form.reset();
-  modal.classList.add('hidden');
+  closeContactForm();
 });
 
 document.getElementById('todayList').addEventListener('click', (e) => {
@@ -539,9 +629,81 @@ document.getElementById('contactGrid').addEventListener('click', (e) => {
   if (contact) openContactDetail(contact);
 });
 
+document.getElementById('contactSearch').addEventListener('input', (e) => {
+  contactSearchTerm = e.target.value.trim().toLowerCase();
+  renderContacts();
+});
+
+// --- Slide-out contact panel ---
+
+const contactPanel = document.getElementById('contactPanel');
+const contactPanelToggle = document.getElementById('contactPanelToggle');
+
+function setContactPanelOpen(open) {
+  contactPanel.classList.toggle('open', open);
+  contactPanelToggle.classList.toggle('open', open);
+  contactPanel.setAttribute('aria-hidden', String(!open));
+  contactPanelToggle.setAttribute('aria-expanded', String(open));
+}
+
+contactPanelToggle.addEventListener('click', () => {
+  setContactPanelOpen(!contactPanel.classList.contains('open'));
+});
+
+document.getElementById('contactPanelClose').addEventListener('click', () => setContactPanelOpen(false));
+
+document.getElementById('contactPanelList').addEventListener('click', (e) => {
+  const btn = e.target.closest('.panel-edit-btn, .panel-delete-btn, .panel-contact-main');
+  if (!btn) return;
+
+  const contact = contacts.find(c => c.id === btn.dataset.id);
+  if (!contact) return;
+
+  if (btn.classList.contains('panel-delete-btn')) {
+    deleteContact(contact);
+    return;
+  }
+
+  setContactPanelOpen(false);
+  if (btn.classList.contains('panel-edit-btn')) openContactForEditing(contact);
+  else openContactDetail(contact);
+});
+
 document.getElementById('closeDetailBtn').addEventListener('click', () => {
   detailModal.classList.add('hidden');
   activeContactId = null;
+});
+
+document.getElementById('editContactBtn').addEventListener('click', () => {
+  const contact = contacts.find(c => c.id === activeContactId);
+  if (!contact) return;
+
+  detailModal.classList.add('hidden');
+  activeContactId = null;
+  openContactForEditing(contact);
+});
+
+function deleteContact(contact) {
+  const count = contact.touchpoints.length;
+  const warning = count
+    ? `Delete ${contact.name} and their ${count} touchpoint${count === 1 ? '' : 's'}? This cannot be undone.`
+    : `Delete ${contact.name}? This cannot be undone.`;
+  if (!confirm(warning)) return;
+
+  contacts = contacts.filter(c => c.id !== contact.id);
+  saveContacts();
+
+  if (activeContactId === contact.id) {
+    detailModal.classList.add('hidden');
+    activeContactId = null;
+  }
+  renderContacts();
+  renderToday();
+}
+
+document.getElementById('deleteContactBtn').addEventListener('click', () => {
+  const contact = contacts.find(c => c.id === activeContactId);
+  if (contact) deleteContact(contact);
 });
 
 touchpointForm.addEventListener('submit', (e) => {

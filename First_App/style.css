@@ -279,13 +279,20 @@ a {
 }
 
 .cow-chat-title {
-  margin: 0 0 12px;
+  margin: 0;
   padding-right: 28px;
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
+}
+
+.cow-chat-tagline {
+  margin: 4px 0 14px;
+  padding-right: 28px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
 }
 
 .cow-chat-steps {

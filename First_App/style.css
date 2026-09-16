@@ -161,6 +161,10 @@ a {
 .cow-muzzle { fill: var(--pink); stroke: var(--ink); stroke-width: 2; }
 .cow-nostril { fill: var(--ink); stroke: none; }
 .cow-hoof { fill: var(--ink); stroke: none; }
+.cow-body { fill: var(--card); stroke: var(--ink); stroke-width: 2; }
+/* A limb is two strokes: the ink one is the outline, the card one is the fill. */
+.cow-limb-line { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
+.cow-limb-fill { fill: none; stroke: var(--card); stroke-width: 7; stroke-linecap: round; }
 
 /* --- Topbar --- */
 
@@ -1585,5 +1589,175 @@ main {
 
   .toast.show {
     transform: translateY(0);
+  }
+}
+
+/* --- Scratch pad: a cow holding up a note board, bottom left --- */
+
+.cow-notes {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 28;
+  display: flex;
+  align-items: flex-end;
+}
+
+.cow-standing {
+  width: 104px;
+  height: 149px;
+  flex-shrink: 0;
+  margin-right: -14px;
+  margin-bottom: 4px;
+  overflow: visible;
+}
+
+.cow-notes-board {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+}
+
+/* The dark bar doubles as the drag handle for the whole pad. */
+.cow-notes-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  background: var(--ink);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.cow-notes.dragging .cow-notes-head,
+.cow-notes-head:active {
+  cursor: grabbing;
+}
+
+.cow-notes-grab {
+  color: rgba(255, 248, 240, 0.55);
+  flex-shrink: 0;
+}
+
+.cow-notes-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #FFF8F0;
+}
+
+.cow-notes-dismiss {
+  width: 26px;
+  height: 26px;
+  color: rgba(255, 248, 240, 0.7);
+}
+
+.cow-notes-dismiss:hover {
+  background: rgba(255, 248, 240, 0.14);
+  color: #FFF8F0;
+}
+
+.cow-notes-body {
+  position: relative;
+}
+
+.cow-notes-board textarea {
+  display: block;
+  width: 258px;
+  height: 132px;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.55;
+  resize: none;
+}
+
+/* A corner grip big enough to grab without aiming. */
+.cow-notes-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.cow-notes-resize:hover {
+  color: var(--ink-soft);
+}
+
+.cow-notes-resize svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cow-notes-board textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+.cow-notes-board textarea:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--blue-tint);
+}
+
+.cow-notes-show {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 28;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  animation: rise var(--t) var(--ease) both;
+  transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+
+.cow-notes-show:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cow-notes-show .cow-notes-icon {
+  width: 19px;
+  height: 19px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cow-notes-show:hover {
+    transform: none;
+  }
+}
+
+/* The pad is a desk-sized affordance; on a phone it would fight the toast
+   and eat the screen, so it stays on wider viewports. */
+@media (max-width: 720px) {
+  .cow-notes,
+  .cow-notes-show {
+    display: none;
   }
 }

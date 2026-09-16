@@ -898,5 +898,176 @@ touchpointForm.addEventListener('submit', (e) => {
   exitEditMode();
 });
 
+// --- Scratch pad: the cow holding a note board ---
+
+const NOTES_KEY = 'cadence_notes';
+const NOTES_HIDDEN_KEY = 'cadence_notes_hidden';
+const NOTES_POS_KEY = 'cadence_notes_pos';
+const NOTES_SIZE_KEY = 'cadence_notes_size';
+
+const NOTES_MIN_W = 200;
+const NOTES_MIN_H = 90;
+const NOTES_EDGE = 8;
+
+const cowNotes = document.getElementById('cowNotes');
+const cowNotesText = document.getElementById('cowNotesText');
+const cowNotesShow = document.getElementById('cowNotesShow');
+
+function readStored(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeStored(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    /* storage unavailable; notes just won't persist */
+  }
+}
+
+cowNotesText.value = readStored(NOTES_KEY) || '';
+
+cowNotesText.addEventListener('input', () => {
+  writeStored(NOTES_KEY, cowNotesText.value);
+});
+
+function setNotesVisible(visible) {
+  writeStored(NOTES_HIDDEN_KEY, visible ? '' : '1');
+  cowNotes.classList.toggle('hidden', !visible);
+  cowNotesShow.classList.toggle('hidden', visible);
+  if (visible) keepNotesOnScreen();
+}
+
+document.getElementById('cowNotesDismiss').addEventListener('click', () => setNotesVisible(false));
+cowNotesShow.addEventListener('click', () => setNotesVisible(true));
+
+// --- Moving and resizing the pad ---
+
+function applyNotesSize(width, height) {
+  cowNotesText.style.width = Math.round(width) + 'px';
+  cowNotesText.style.height = Math.round(height) + 'px';
+}
+
+// Pin the pad by its top-left corner so dragging and clamping share one system.
+function applyNotesPos(left, top) {
+  cowNotes.style.left = Math.round(left) + 'px';
+  cowNotes.style.top = Math.round(top) + 'px';
+  cowNotes.style.bottom = 'auto';
+}
+
+function keepNotesOnScreen() {
+  const box = cowNotes.getBoundingClientRect();
+  // Zero size means it isn't on screen (hidden, or below the phone breakpoint).
+  if (!box.width) return;
+  const maxLeft = Math.max(NOTES_EDGE, window.innerWidth - box.width - NOTES_EDGE);
+  const maxTop = Math.max(NOTES_EDGE, window.innerHeight - box.height - NOTES_EDGE);
+  const left = Math.min(Math.max(box.left, NOTES_EDGE), maxLeft);
+  const top = Math.min(Math.max(box.top, NOTES_EDGE), maxTop);
+  if (left !== box.left || top !== box.top) applyNotesPos(left, top);
+}
+
+function storeNotesPos() {
+  const box = cowNotes.getBoundingClientRect();
+  writeStored(NOTES_POS_KEY, JSON.stringify({ left: Math.round(box.left), top: Math.round(box.top) }));
+}
+
+function readJson(key) {
+  try {
+    return JSON.parse(readStored(key) || 'null');
+  } catch (e) {
+    return null;
+  }
+}
+
+const savedNotesSize = readJson(NOTES_SIZE_KEY);
+if (savedNotesSize) applyNotesSize(savedNotesSize.width, savedNotesSize.height);
+
+const savedNotesPos = readJson(NOTES_POS_KEY);
+if (savedNotesPos) applyNotesPos(savedNotesPos.left, savedNotesPos.top);
+
+// Drag the dark header bar to move the whole cow-and-board.
+document.getElementById('cowNotesHandle').addEventListener('pointerdown', (e) => {
+  if (e.button !== 0 || e.target.closest('button')) return;
+  const box = cowNotes.getBoundingClientRect();
+  const offsetX = e.clientX - box.left;
+  const offsetY = e.clientY - box.top;
+  cowNotes.classList.add('dragging');
+
+  function onMove(ev) {
+    const maxLeft = Math.max(NOTES_EDGE, window.innerWidth - box.width - NOTES_EDGE);
+    const maxTop = Math.max(NOTES_EDGE, window.innerHeight - box.height - NOTES_EDGE);
+    applyNotesPos(
+      Math.min(Math.max(ev.clientX - offsetX, NOTES_EDGE), maxLeft),
+      Math.min(Math.max(ev.clientY - offsetY, NOTES_EDGE), maxTop)
+    );
+  }
+
+  function onUp() {
+    cowNotes.classList.remove('dragging');
+    storeNotesPos();
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+  }
+
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+  document.addEventListener('pointercancel', onUp);
+  e.preventDefault();
+});
+
+// Drag the corner grip to resize the note area.
+document.getElementById('cowNotesResize').addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  const startX = e.clientX;
+  const startY = e.clientY;
+  const startW = cowNotesText.offsetWidth;
+  const startH = cowNotesText.offsetHeight;
+  // Don't let it grow past the window edges.
+  const textBox = cowNotesText.getBoundingClientRect();
+  const maxW = Math.max(NOTES_MIN_W, window.innerWidth - textBox.left - NOTES_EDGE);
+  const maxH = Math.max(NOTES_MIN_H, window.innerHeight - textBox.top - NOTES_EDGE);
+  cowNotes.classList.add('dragging');
+
+  function onMove(ev) {
+    applyNotesSize(
+      Math.min(Math.max(NOTES_MIN_W, startW + (ev.clientX - startX)), maxW),
+      Math.min(Math.max(NOTES_MIN_H, startH + (ev.clientY - startY)), maxH)
+    );
+  }
+
+  function onUp() {
+    cowNotes.classList.remove('dragging');
+    writeStored(NOTES_SIZE_KEY, JSON.stringify({
+      width: cowNotesText.offsetWidth,
+      height: cowNotesText.offsetHeight
+    }));
+    keepNotesOnScreen();
+    storeNotesPos();
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+  }
+
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+  document.addEventListener('pointercancel', onUp);
+  e.preventDefault();
+});
+
+window.addEventListener('resize', keepNotesOnScreen);
+
+// Restore whichever state they left it in.
+if (readStored(NOTES_HIDDEN_KEY) === '1') {
+  cowNotes.classList.add('hidden');
+  cowNotesShow.classList.remove('hidden');
+} else {
+  keepNotesOnScreen();
+}
+
 renderContacts();
 renderToday();

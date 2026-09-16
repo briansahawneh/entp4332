@@ -87,6 +87,12 @@
     <symbol id="i-dot" viewBox="0 0 20 20" class="i-stroke">
       <circle cx="10" cy="10" r="5.5"/>
     </symbol>
+    <!-- Notepad with a pen, for the scratch pad -->
+    <symbol id="i-notepad" viewBox="0 0 20 20" class="i-stroke">
+      <path d="M12.6 9.2V16a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 16V4.6A1.8 1.8 0 0 1 5 2.8h5.8"/>
+      <path d="M6 6.6h3.4M6 9.6h3M6 12.6h2"/>
+      <path d="m15.1 3.4 1.9 1.9-6.2 6.2-2.5.6.6-2.5Z"/>
+    </symbol>
   </defs>
 </svg>
 
@@ -247,6 +253,62 @@
     </div>
   </div>
 </div>
+
+<div id="cowNotes" class="cow-notes">
+  <svg class="cow-standing" viewBox="0 0 120 172" aria-hidden="true">
+    <!-- hind legs, each ending in a split (cloven) hoof -->
+    <rect x="39" y="128" width="16" height="32" rx="8" class="cow-body"/>
+    <rect x="65" y="128" width="16" height="32" rx="8" class="cow-body"/>
+    <path d="M39 159.5C39 156 42.6 154 47 154C51.4 154 55 156 55 159.5C55 163 53.2 166 51 166C48.8 166 47 163.5 47 160.5C47 163.5 45.2 166 43 166C40.8 166 39 163 39 159.5Z" class="cow-hoof"/>
+    <path d="M65 159.5C65 156 68.6 154 73 154C77.4 154 81 156 81 159.5C81 163 79.2 166 77 166C74.8 166 73 163.5 73 160.5C73 163.5 71.2 166 69 166C66.8 166 65 163 65 159.5Z" class="cow-hoof"/>
+
+    <!-- foreleg reaching up to the board, drawn first so the shoulder tucks behind the torso -->
+    <path d="M78 104c12-2 20-9 26-27" class="cow-limb-line"/>
+    <path d="M78 104c12-2 20-9 26-27" class="cow-limb-fill"/>
+    <path d="M-5 -1.5C-6.6 -4 -7.2 -7 -7.2 -9.5C-7.2 -13.2 -5.6 -15.6 -3.1 -15.6C-1.2 -15.6 0 -13 0 -9C0 -13 1.2 -15.6 3.1 -15.6C5.6 -15.6 7.2 -13.2 7.2 -9.5C7.2 -7 6.6 -4 5 -1.5C5 1.2 -5 1.2 -5 -1.5Z"
+          transform="translate(104 77) rotate(18)" class="cow-hoof"/>
+
+    <!-- torso -->
+    <path d="M32 88c0-23 12-35 28-35s28 12 28 35v30c0 15-12 24-28 24s-28-9-28-24Z" class="cow-body"/>
+    <path d="M42 97c7-3 13 0 14 6.5.8 6.5-4.5 11.5-11.5 11.5S32 111 32 106c0-4.5 4-6.5 10-9Z" class="cow-spot"/>
+
+    <!-- head -->
+    <path d="M45 15.5c-1.8-2.4-1.5-5 .4-5.7 2-.8 4 1 4.6 3.6" class="cow-horn"/>
+    <path d="M71 15.5c1.8-2.4 1.5-5-.4-5.7-2-.8-4 1-4.6 3.6" class="cow-horn"/>
+    <ellipse cx="33" cy="26" rx="6" ry="4" transform="rotate(-24 33 26)" class="cow-ear"/>
+    <ellipse cx="83" cy="26" rx="6" ry="4" transform="rotate(24 83 26)" class="cow-ear"/>
+    <path d="M58 13c13.8 0 24.5 8.8 24.5 21.2 0 13.8-10.7 23.2-24.5 23.2S33.5 48 33.5 34.2C33.5 21.8 44.2 13 58 13Z" class="cow-head"/>
+    <path d="M45.5 20c4.2-1.2 7.8.8 8.2 4.4.4 3.8-2.6 6.6-6.8 6.8-4.6.2-7.8-2.2-8-6-.2-3.2 2.6-4.8 6.6-5.2Z" class="cow-spot"/>
+    <circle cx="50" cy="35" r="2.6" class="cow-eye"/>
+    <circle cx="66" cy="35" r="2.6" class="cow-eye"/>
+    <ellipse cx="58" cy="47" rx="13" ry="8.6" class="cow-muzzle"/>
+    <ellipse cx="53" cy="46" rx="2" ry="2.6" class="cow-nostril"/>
+    <ellipse cx="63" cy="46" rx="2" ry="2.6" class="cow-nostril"/>
+  </svg>
+
+  <div class="cow-notes-board">
+    <div class="cow-notes-head" id="cowNotesHandle" title="Drag to move the scratch pad">
+      <span class="cow-notes-title">Scratch pad</span>
+      <svg class="icon cow-notes-grab" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-grip"/></svg>
+      <button type="button" id="cowNotesDismiss" class="icon-btn cow-notes-dismiss" aria-label="Hide the scratch pad">
+        <svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-close"/></svg>
+      </button>
+    </div>
+    <div class="cow-notes-body">
+      <textarea id="cowNotesText" aria-label="Scratch pad notes" placeholder="Jot a quick to-do.&#10;&#10;- call Priya back&#10;- send the deck"></textarea>
+      <div id="cowNotesResize" class="cow-notes-resize" title="Drag to resize the scratch pad">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19 9 9 19M19 14.5 14.5 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button type="button" id="cowNotesShow" class="cow-notes-show hidden">
+  <svg class="icon cow-notes-icon" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-notepad"/></svg>
+  <span>Scratch pad</span>
+</button>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
